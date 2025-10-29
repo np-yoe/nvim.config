@@ -19,7 +19,7 @@ vim.api.nvim_set_keymap('i', '<C-k>', '<C-\\><C-n>', { noremap = true })
 vim.api.nvim_set_keymap('v', 'J', ":move '>+1<CR>gv-gv", { noremap = true })
 vim.api.nvim_set_keymap('v', 'K', ":move '<-2<CR>gv-gv", { noremap = true })
 
-vim.cmd('autocmd FileType go inoremap <C-s> :=')
+vim.cmd('autocmd FileType go inoremap <C-e> :=')
 vim.cmd('autocmd FileType rust inoremap <C-s> ::')
 vim.cmd('autocmd FileType haskell inoremap <C-s> ::')
 vim.cmd('autocmd FileType haskell set expandtab')
