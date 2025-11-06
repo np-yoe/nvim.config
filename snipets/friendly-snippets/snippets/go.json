@@ -1,11 +1,11 @@
 {
   "struct": {
-    "prefix": "ts",
+    "prefix": "st",
     "body": "type ${1:Name} struct {\n\t$0\n}",
     "description": "struct"
   },
   "interface": {
-    "prefix": "ti",
+    "prefix": "in",
     "body": "type ${1:Name} interface {\n\t$0\n}",
     "description": "interface"
   },
@@ -19,13 +19,8 @@
     "body": "log.Fatal($1)",
     "description": "log.Fatal"
   },
-  "fmt.Print": {
-    "prefix": "pr",
-    "body": "fmt.Print($1)",
-    "description": "fmt.Print"
-  },
   "fmt.Println": {
-    "prefix": "prl",
+    "prefix": "pr",
     "body": "fmt.Println($1)",
     "description": "fmt.Println"
   },
@@ -125,9 +120,14 @@
     "description": ""
   },
   "function": {
-    "prefix": "f",
+    "prefix": "fn",
     "body": "func $1($2) $3 {\n\t$0\n}",
     "description": "function"
+  },
+  "main": {
+    "prefix": "main",
+    "body": "func main() {\n\t$0\n}",
+    "description": "main function"
   },
   "receiver": {
     "prefix": "re",
@@ -139,9 +139,14 @@
     "body": "for ${1}{\n\t$0\n}",
     "description": "for"
   },
+  "fori": {
+    "prefix": "fori",
+    "body": "for ${1} := 0; ${1} < ${2}; $1++ {\n\t$0\n}",
+    "description": "for"
+  },
   "for range": {
     "prefix": "forr",
-    "body": "for ${1:_, }${2:v} := range ${3:v} {\n\t$0\n}",
+    "body": "for ${1} := range ${2} {\n\t$0\n}",
     "description": "for range"
   },
   "select": {
