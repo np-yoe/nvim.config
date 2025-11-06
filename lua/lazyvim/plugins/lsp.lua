@@ -217,7 +217,7 @@ return {
 					})
 				end
 			}, -- Required
-		},
+		}, -- dependencies section ends
 		config = function()
 			require("mason").setup()
 			local capabilities = require('cmp_nvim_lsp').default_capabilities()
@@ -241,6 +241,8 @@ return {
 				end, opts)
 			end
 
+			vim.lsp.config('*', { on_attach = on_attach, capabilities = capabilities })
+
 			vim.lsp.config('lua_ls', {
 				on_attach = on_attach,
 				capabilities = capabilities,
@@ -252,7 +254,6 @@ return {
 				},
 			})
 			vim.lsp.enable('lua_ls')
-			vim.lsp.config('*', { on_attach = on_attach, capabilities = capabilities })
 
 			-- server settings
 			vim.lsp.config("rust_analyzer", {
@@ -297,9 +298,52 @@ return {
 	{
 		"pmizio/typescript-tools.nvim",
 		dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
-		opts = {},
+		opts = {
+			tsserver_file_preferences = {
+				-- Inlay Hints
+				includeInlayParameterNameHints = "all",
+				includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+				includeInlayFunctionParameterTypeHints = true,
+				includeInlayVariableTypeHints = true,
+				includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+				includeInlayPropertyDeclarationTypeHints = true,
+				includeInlayFunctionLikeReturnTypeHints = true,
+				includeInlayEnumMemberValueHints = true,
+			},
+		},
 		config = function()
 			require("typescript-tools").setup {
+				on_attach = function(client, bufnr)
+					local opts = { buffer = bufnr, remap = false }
+					local luasnip = require('luasnip')
+					vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+					vim.keymap.set('n', 'L', vim.diagnostic.open_float, opts)
+					vim.keymap.set('n', 'F', vim.lsp.buf.format, opts)
+					vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+					vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+					vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+					vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+					vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, opts)
+					vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+					vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
+					vim.keymap.set({ 'i' }, '<C-k>', function()
+						if luasnip.expand_or_jumpable() then
+							luasnip.expand_or_jump()
+						end
+					end, opts)
+					vim.keymap.set(
+						"n",
+						"gfr",
+						"<Cmd>TSToolsFileReferences<CR>",
+						{ buffer = bufnr })
+					vim.keymap.set(
+						"n",
+						"<space>rf",
+						"<Cmd>TSToolsRenameFile<CR>",
+						{ buffer = bufnr }
+					)
+				end,
+				handlers = {},
 				settings = {
 					-- spawn additional tsserver instance to calculate diagnostics on it
 					separate_diagnostic_server = true,
@@ -326,7 +370,7 @@ return {
 					-- https://github.com/microsoft/TypeScript/blob/3c221fc086be52b19801f6e8d82596d04607ede6/src/compiler/utilitiesPublic.ts#L620
 					tsserver_locale = "en",
 					-- mirror of VSCode's `typescript.suggest.completeFunctionCalls`
-					complete_function_calls = false,
+					complete_function_calls = true,
 					include_completions_with_insert_text = true,
 					-- CodeLens
 					-- WARNING: Experimental feature also in VSCode, because it might hit performance of server.
@@ -339,7 +383,7 @@ return {
 					-- WARNING: it is disabled by default (maybe you configuration or distro already uses nvim-ts-autotag,
 					-- that maybe have a conflict if enable this feature. )
 					jsx_close_tag = {
-						enable = false,
+						enable = true,
 						filetypes = { "javascriptreact", "typescriptreact" },
 					}
 				},
