@@ -185,9 +185,8 @@ return {
 			{ "<Space>fj", "<cmd>Telescope live_grep theme=dropdown<CR>" },
 			{ "<Space>b",  "<cmd>Telescope buffers theme=dropdown<CR>" },
 			{ "<Space>fs", "<cmd>Telescope current_buffer_fuzzy_find theme=dropdown<CR>" },
-			-- git
-			{ "<Space>gc", "<cmd>Telescope git_commits<CR>" },
-			{ "<Space>R",  mode = { "v" },                                               "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>" },
+			-- refactoring
+			{ "<Space>R",  mode = { "v" }, "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>" },
 		},
 		config = function()
 			require('telescope').setup {
