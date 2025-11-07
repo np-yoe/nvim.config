@@ -184,5 +184,21 @@ return {
 		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
 		ft = { "markdown" },
 		build = function() vim.fn["mkdp#util#install"]() end,
+	},
+	{
+		"hat0uma/csvview.nvim",
+		opts = {
+			parser = { comments = { "#", "//" } },
+		},
+		cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
+		keys = {
+			{
+				"<Space>t", mode = { "n" }, ":CsvViewToggle delimiter=, display_mode=border header_lnum=1<CR>" },
+		},
+
+	},
+	{
+		"terrastruct/d2-vim",
+		ft = { "d2" },
 	}
 }
