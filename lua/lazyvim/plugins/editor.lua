@@ -395,10 +395,7 @@ return {
 			vim.o.foldlevelstart = 99
 			vim.o.foldenable = true
 
-			vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
-			vim.keymap.set('n', 'zr', require('ufo').openFoldsExceptKinds)
-			vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
-			vim.keymap.set('n', 'zm', function()
+			vim.keymap.set('n', 'zf', function()
 				local winid = vim.api.nvim_get_current_win()
 				local cursor = vim.api.nvim_win_get_cursor(winid)
 				local lnum = cursor[1]
@@ -408,6 +405,9 @@ return {
 					vim.cmd(lnum .. "foldclose")
 				end
 			end)
+			vim.keymap.set('n', 'zF', require('ufo').closeAllFolds)
+			vim.keymap.set('n', 'zo', require('ufo').openFoldsExceptKinds)
+			vim.keymap.set('n', 'zO', require('ufo').openAllFolds)
 
 			require('ufo').setup({
 				provider_selector = function(bufnr, filetype, buftype)
