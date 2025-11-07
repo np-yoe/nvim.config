@@ -1,16 +1,6 @@
 return {
-	{
-		"kosayoda/nvim-lightbulb",
-		config = function()
-			require("nvim-lightbulb").setup({
-				autocmd = { enabled = true },
-				sign = { enabled = false },
-				virtual_text = { enabled = true },
-			})
-		end
-	},
-	"mg979/vim-visual-multi",
-	"kevinhwang91/nvim-bqf",
+	"mg979/vim-visual-multi", -- multi cursor selection with Ctrl-n
+	"kevinhwang91/nvim-bqf", -- Quicfix preview
 	{
 		'monaqa/dial.nvim',
 		keys = {
@@ -29,13 +19,6 @@ return {
 			}
 		end
 	},
-	-- {
-	-- 	"mattn/emmet-vim",
-	-- 	config = function()
-	-- 		-- vim.cmd("let g:user_emmet_mode=''")
-	-- 		-- vim.cmd("let g:user_emmet_leader_key='<c-e>'")
-	-- 	end
-	-- },
 	{
 		"folke/zen-mode.nvim",
 		config = function()
@@ -66,11 +49,15 @@ return {
 			end)
 		end
 	},
-	'jiangmiao/auto-pairs',
+	'jiangmiao/auto-pairs', -- auto close brackets
+	-- surround words, paragraphs, etc
+	-- ysaw [, Ctrl-V + S + <tag>, ds', yss {, yss <tag,  cs" ', ...
 	'tpope/vim-surround',
-	'tpope/vim-commentary',
-	"terryma/vim-expand-region",
+	'tpope/vim-commentary', -- comment/uncomment with visual selection + gc
+	-- "terryma/vim-expand-region",
 	{
+		-- remove trailing whitespaces
+		-- Disable with `:DisableWhitespace `
 		'ntpeters/vim-better-whitespace',
 		config = function()
 			vim.cmd('let g:better_whitespace_enabled=1')
@@ -79,12 +66,14 @@ return {
 		end,
 	},
 	{
+		-- align selection
 		'junegunn/vim-easy-align',
 		keys = {
 			{ "ga", mode = { "n", "v" }, "<Plug>(EasyAlign)" },
 		},
 	},
 	{
+		-- display diagnostics
 		"folke/trouble.nvim",
 		opts = {}, -- for default options, refer to the configuration section for custom setup.
 		cmd = "Trouble",
@@ -97,6 +86,7 @@ return {
 		},
 	},
 	{
+		-- snippet engine
 		'L3MON4D3/LuaSnip',
 		-- follow latest release.
 		version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
@@ -156,7 +146,7 @@ return {
 			-- The directories will have to be structured like eg. <https://github.com/rafamadriz/friendly-snippets> (include
 			-- a similar `package.json`)
 			require("luasnip.loaders.from_vscode").lazy_load()
-			require("luasnip.loaders.from_vscode").lazy_load({ paths = { "~/repos/nvim.config/snipets/friendly-snippets/" } })
+			require("luasnip.loaders.from_vscode").lazy_load({ paths = { "~/dotfiles/.config/nvim/snipets/friendly-snippets/" } })
 
 			-- You can also use snippets in snipmate format, for example <https://github.com/honza/vim-snippets>.
 			-- The usage is similar to vscode.
@@ -183,6 +173,7 @@ return {
 		end,
 	},
 	{
+		-- telescope
 		"nvim-telescope/telescope.nvim",
 		dependeicies = { "plenary.nvim" },
 		keys = {
@@ -191,7 +182,7 @@ return {
 			{ "<Space>b",  "<cmd>Telescope buffers theme=dropdown<CR>" },
 			{ "<Space>fs", "<cmd>Telescope current_buffer_fuzzy_find theme=dropdown<CR>" },
 			-- refactoring
-			{ "<Space>R",  mode = { "v" }, "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>" },
+			{ "<Space>R",  mode = { "v" },                                               "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>" },
 		},
 		config = function()
 			require('telescope').setup {
@@ -266,6 +257,7 @@ return {
 		end
 	},
 	{
+		-- quick teminal
 		"akinsho/toggleterm.nvim",
 		keys = {
 			{ "<Esc>", mode = { "t" },                        "<C-\\><C-n>" },
@@ -325,22 +317,7 @@ return {
 		end,
 	},
 	{
-		"xiyaowong/transparent.nvim",
-		config = function()
-			require("transparent").setup({ -- Optional, you don't have to run setup.
-				groups = {                -- table: default groups
-					'Normal', 'NormalNC', 'Comment', 'Constant', 'Special', 'Identifier',
-					'Statement', 'PreProc', 'Type', 'Underlined', 'Todo', 'String', 'Function',
-					'Conditional', 'Repeat', 'Operator', 'Structure', 'LineNr', 'NonText',
-					'SignColumn', 'CursorLineNr', 'EndOfBuffer',
-				},
-				extra_groups = {}, -- table: additional groups that should be cleared
-				exclude_groups = {}, -- table: groups you don't want to clear
-			})
-		end
-
-	},
-	{
+		-- code outline
 		"stevearc/aerial.nvim",
 		config = function()
 			require("aerial").setup({
@@ -367,12 +344,15 @@ return {
 
 		config = function()
 			require("sniprun").setup({
-				vim.api.nvim_set_keymap('v', '<Space>r', '<Plug>SnipRun<CR>', { silent = true }),
-				vim.api.nvim_set_keymap('n', '<Space>r', '<Plug>SnipRun<CR>', { silent = true }),
-				vim.api.nvim_set_keymap('n', '<Space>c', '<Plug>SnipClose<CR>', { silent = true }),
-				vim.api.nvim_set_keymap('n', '<Space>r', '<Plug>SnipRunOperator<CR>', { silent = true }),
+				vim.api.nvim_set_keymap('v', '<Space>r', '<Plug>SnipRun<CR>', {}),
+				vim.api.nvim_set_keymap('n', '<Space>r', '<Plug>SnipRun<CR>', {}),
+				vim.api.nvim_set_keymap('n', '<Space>c', '<Plug>SnipClose<CR>', {}),
+				vim.api.nvim_set_keymap('n', '<Space>r', '<Plug>SnipRunOperator<CR>', {}),
 
-				display = { "Terminal" },
+				display = { "TempFloatingWindow" },
+
+				selected_interpreters = { "JS_TS_bun" },
+				repl_enable = { "JS_TS_bun" }
 			})
 		end,
 	},
