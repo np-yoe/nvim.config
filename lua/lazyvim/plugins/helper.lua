@@ -178,6 +178,7 @@ return {
 	'tpope/vim-repeat',          -- enhance . repeat
 	"terryma/vim-expand-region", -- expand visual selection with +/_
 	'dhruvasagar/vim-table-mode', -- markdown table mode
+	'djoshea/vim-autoread',
 	{
 		-- Preview markdown on browser
 		"iamcco/markdown-preview.nvim",
