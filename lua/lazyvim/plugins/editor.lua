@@ -1,16 +1,6 @@
 return {
-	{
-		"kosayoda/nvim-lightbulb",
-		config = function()
-			require("nvim-lightbulb").setup({
-				autocmd = { enabled = true },
-				sign = { enabled = false },
-				virtual_text = { enabled = true },
-			})
-		end
-	},
-	"mg979/vim-visual-multi",
-	"kevinhwang91/nvim-bqf",
+	"mg979/vim-visual-multi", -- multi cursor selection with Ctrl-n
+	"kevinhwang91/nvim-bqf", -- Quicfix preview
 	{
 		'monaqa/dial.nvim',
 		keys = {
@@ -29,13 +19,6 @@ return {
 			}
 		end
 	},
-	-- {
-	-- 	"mattn/emmet-vim",
-	-- 	config = function()
-	-- 		-- vim.cmd("let g:user_emmet_mode=''")
-	-- 		-- vim.cmd("let g:user_emmet_leader_key='<c-e>'")
-	-- 	end
-	-- },
 	{
 		"folke/zen-mode.nvim",
 		config = function()
@@ -58,14 +41,23 @@ return {
 			{ "nvim-treesitter/nvim-treesitter" }
 		},
 		config = function()
-
+			vim.keymap.set({ 'x', 'n' }, '<space>dv', function()
+				require('refactoring').debug.print_var()
+			end)
+			vim.keymap.set('n', '<space>dc', function()
+				require('refactoring').debug.cleanup {}
+			end)
 		end
 	},
-	'jiangmiao/auto-pairs',
+	'jiangmiao/auto-pairs', -- auto close brackets
+	-- surround words, paragraphs, etc
+	-- ysaw [, Ctrl-V + S + <tag>, ds', yss {, yss <tag,  cs" ', ...
 	'tpope/vim-surround',
-	'tpope/vim-commentary',
-	"terryma/vim-expand-region",
+	'tpope/vim-commentary', -- comment/uncomment with visual selection + gc
+	-- "terryma/vim-expand-region",
 	{
+		-- remove trailing whitespaces
+		-- Disable with `:DisableWhitespace `
 		'ntpeters/vim-better-whitespace',
 		config = function()
 			vim.cmd('let g:better_whitespace_enabled=1')
@@ -74,69 +66,27 @@ return {
 		end,
 	},
 	{
+		-- align selection
 		'junegunn/vim-easy-align',
 		keys = {
 			{ "ga", mode = { "n", "v" }, "<Plug>(EasyAlign)" },
 		},
 	},
 	{
+		-- display diagnostics
 		"folke/trouble.nvim",
-		lazy = true,
+		opts = {}, -- for default options, refer to the configuration section for custom setup.
+		cmd = "Trouble",
 		keys = {
-			{ "T", ":TroubleToggle<CR>" },
+			{
+				"T",
+				"<cmd>Trouble diagnostics toggle focus=false filter.buf=0<cr>",
+				desc = "Diagnostics (Trouble)",
+			},
 		},
-		config = function()
-			require('trouble').setup {
-				position = "bottom", -- position of the list can be: bottom, top, left, right
-				height = 8, -- height of the trouble list when position is top or bottom
-				width = 50, -- width of the list when position is left or right
-				icons = true, -- use devicons for filenames
-				mode = "workspace_diagnostics", -- "workspace_diagnostics", "document_diagnostics", "quickfix", "lsp_references", "loclist"
-				fold_open = "", -- icon used for open folds
-				fold_closed = "", -- icon used for closed folds
-				group = true, -- group results by file
-				padding = true, -- add an extra new line on top of the list
-				action_keys = {
-					-- key mappings for actions in the trouble list
-					-- map to {} to remove a mapping, for example:
-					-- close = {},
-					close = "q",                 -- close the list
-					cancel = "<esc>",            -- cancel the preview and get back to your last window / buffer / cursor
-					refresh = "r",               -- manually refresh
-					jump = { "<cr>", "<tab>" },  -- jump to the diagnostic or open / close folds
-					open_split = { "<c-x>" },    -- open buffer in new split
-					open_vsplit = { "<c-v>" },   -- open buffer in new vsplit
-					open_tab = { "<c-t>" },      -- open buffer in new tab
-					jump_close = { "o" },        -- jump to the diagnostic and close the list
-					toggle_mode = "m",           -- toggle between "workspace" and "document" diagnostics mode
-					toggle_preview = "P",        -- toggle auto_preview
-					hover = "K",                 -- opens a small popup with the full multiline message
-					preview = "p",               -- preview the diagnostic location
-					close_folds = { "zM", "zm" }, -- close all folds
-					open_folds = { "zR", "zr" }, -- open all folds
-					toggle_fold = { "zA", "za" }, -- toggle fold of current file
-					previous = "k",              -- previous item
-					next = "j"                   -- next item
-				},
-				indent_lines = true,           -- add an indent guide below the fold icons
-				auto_open = false,             -- automatically open the list when you have diagnostics
-				auto_close = true,             -- automatically close the list when you have no diagnostics
-				auto_preview = false,          -- automatically preview the location of the diagnostic. <esc> to close preview and go back to last window
-				auto_fold = false,             -- automatically fold a file trouble list at creation
-				auto_jump = { "lsp_definitions" }, -- for the given modes, automatically jump if there is only a single result
-				signs = {
-					-- icons / text used for a diagnostic
-					error = "🌶️",
-					warning = "🍄",
-					hint = "🍞",
-					information = "🍺",
-					other = "﫠"
-				},
-				use_diagnostic_signs = false -- enabling this will use the signs defined in your lsp client
-			}
-		end
 	},
 	{
+		-- snippet engine
 		'L3MON4D3/LuaSnip',
 		-- follow latest release.
 		version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
@@ -223,6 +173,7 @@ return {
 		end,
 	},
 	{
+		-- telescope
 		"nvim-telescope/telescope.nvim",
 		dependeicies = { "plenary.nvim" },
 		keys = {
@@ -230,8 +181,7 @@ return {
 			{ "<Space>fj", "<cmd>Telescope live_grep theme=dropdown<CR>" },
 			{ "<Space>b",  "<cmd>Telescope buffers theme=dropdown<CR>" },
 			{ "<Space>fs", "<cmd>Telescope current_buffer_fuzzy_find theme=dropdown<CR>" },
-			-- git
-			{ "<Space>gc", "<cmd>Telescope git_commits<CR>" },
+			-- refactoring
 			{ "<Space>R",  mode = { "v" },                                               "<Esc><cmd>lua require('telescope').extensions.refactoring.refactors()<CR>" },
 		},
 		config = function()
@@ -307,6 +257,7 @@ return {
 		end
 	},
 	{
+		-- quick teminal
 		"akinsho/toggleterm.nvim",
 		keys = {
 			{ "<Esc>", mode = { "t" },                        "<C-\\><C-n>" },
@@ -366,22 +317,7 @@ return {
 		end,
 	},
 	{
-		"xiyaowong/transparent.nvim",
-		config = function()
-			require("transparent").setup({ -- Optional, you don't have to run setup.
-				groups = {                -- table: default groups
-					'Normal', 'NormalNC', 'Comment', 'Constant', 'Special', 'Identifier',
-					'Statement', 'PreProc', 'Type', 'Underlined', 'Todo', 'String', 'Function',
-					'Conditional', 'Repeat', 'Operator', 'Structure', 'LineNr', 'NonText',
-					'SignColumn', 'CursorLineNr', 'EndOfBuffer',
-				},
-				extra_groups = {}, -- table: additional groups that should be cleared
-				exclude_groups = {}, -- table: groups you don't want to clear
-			})
-		end
-
-	},
-	{
+		-- code outline
 		"stevearc/aerial.nvim",
 		config = function()
 			require("aerial").setup({
@@ -408,12 +344,15 @@ return {
 
 		config = function()
 			require("sniprun").setup({
-				vim.api.nvim_set_keymap('v', '<Space>r', '<Plug>SnipRun<CR>', { silent = true }),
-				vim.api.nvim_set_keymap('n', '<Space>r', '<Plug>SnipRun<CR>', { silent = true }),
-				vim.api.nvim_set_keymap('n', '<Space>c', '<Plug>SnipClose<CR>', { silent = true }),
-				vim.api.nvim_set_keymap('n', '<Space>r', '<Plug>SnipRunOperator<CR>', { silent = true }),
+				vim.api.nvim_set_keymap('v', '<Space>r', '<Plug>SnipRun<CR>', {}),
+				vim.api.nvim_set_keymap('n', '<Space>r', '<Plug>SnipRun<CR>', {}),
+				vim.api.nvim_set_keymap('n', '<Space>c', '<Plug>SnipClose<CR>', {}),
+				vim.api.nvim_set_keymap('n', '<Space>r', '<Plug>SnipRunOperator<CR>', {}),
 
-				display = { "Terminal" },
+				display = { "TempFloatingWindow" },
+
+				selected_interpreters = { "JS_TS_bun" },
+				repl_enable = { "JS_TS_bun" }
 			})
 		end,
 	},
@@ -440,10 +379,7 @@ return {
 			vim.o.foldlevelstart = 99
 			vim.o.foldenable = true
 
-			vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
-			vim.keymap.set('n', 'zr', require('ufo').openFoldsExceptKinds)
-			vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
-			vim.keymap.set('n', 'zm', function()
+			vim.keymap.set('n', 'zf', function()
 				local winid = vim.api.nvim_get_current_win()
 				local cursor = vim.api.nvim_win_get_cursor(winid)
 				local lnum = cursor[1]
@@ -453,6 +389,9 @@ return {
 					vim.cmd(lnum .. "foldclose")
 				end
 			end)
+			vim.keymap.set('n', 'zF', require('ufo').closeAllFolds)
+			vim.keymap.set('n', 'zo', require('ufo').openFoldsExceptKinds)
+			vim.keymap.set('n', 'zO', require('ufo').openAllFolds)
 
 			require('ufo').setup({
 				provider_selector = function(bufnr, filetype, buftype)
@@ -470,5 +409,101 @@ return {
 			{ "glt", mode = { "n" }, "<cmd>Glance type_definitions<CR>" },
 			{ "gli", mode = { "n" }, "<cmd>Glance implementations<CR>" },
 		},
+		config = function()
+			-- Lua configuration
+			local glance = require('glance')
+			local actions = glance.actions
+
+			glance.setup({
+				height = 25, -- Height of the window
+				zindex = 45,
+
+				-- When enabled, adds virtual lines behind the preview window to maintain context in the parent window
+				-- Requires Neovim >= 0.10.0
+				preserve_win_context = true,
+
+				-- Controls whether the preview window is "embedded" within your parent window or floating
+				-- above all windows.
+				detached = function(winid)
+					-- Automatically detach when parent window width < 100 columns
+					return vim.api.nvim_win_get_width(winid) < 100
+				end,
+				-- Or use a fixed setting: detached = true,
+
+				preview_win_opts = { -- Configure preview window options
+					cursorline = true,
+					number = true,
+					wrap = true,
+				},
+
+				border = {
+					enable = false, -- Show window borders. Only horizontal borders allowed
+					top_char = '―',
+					bottom_char = '―',
+				},
+
+				list = {
+					position = 'right', -- Position of the list window 'left'|'right'
+					width = 0.33, -- Width as percentage (0.1 to 0.5)
+				},
+
+				theme = {
+					enable = true, -- Generate colors based on current colorscheme
+					mode = 'auto', -- 'brighten'|'darken'|'auto', 'auto' will set mode based on the brightness of your colorscheme
+				},
+
+				mappings = {
+					list = {
+						['j'] = actions.next, -- Next item
+						['k'] = actions.previous, -- Previous item
+						['<Down>'] = actions.next,
+						['<Up>'] = actions.previous,
+						['<Tab>'] = actions.next_location,    -- Next location (skips groups, cycles)
+						['<S-Tab>'] = actions.previous_location, -- Previous location (skips groups, cycles)
+						['<C-u>'] = actions.preview_scroll_win(5), -- Scroll up the preview window
+						['<C-d>'] = actions.preview_scroll_win(-5), -- Scroll down the preview window
+						['v'] = actions.jump_vsplit,          -- Open location in vertical split
+						['s'] = actions.jump_split,           -- Open location in horizontal split
+						['t'] = actions.jump_tab,             -- Open in new tab
+						['<CR>'] = actions.jump,              -- Jump to location
+						['o'] = actions.jump,
+						['l'] = actions.open_fold,
+						['h'] = actions.close_fold,
+						['<space>l'] = actions.enter_win('preview'), -- Focus preview window
+						['q'] = actions.close,                  -- Closes Glance window
+						['Q'] = actions.close,
+						['<Esc>'] = actions.close,
+						['<C-q>'] = actions.quickfix, -- Send all locations to quickfix list
+						-- ['<Esc>'] = false -- Disable a mapping
+					},
+
+					preview = {
+						['Q'] = actions.close,
+						['<Tab>'] = actions.next_location,   -- Next location (skips groups, cycles)
+						['<S-Tab>'] = actions.previous_location, -- Previous location (skips groups, cycles)
+						['<space>l'] = actions.enter_win('list'), -- Focus list window
+					},
+				},
+
+				hooks = {}, -- Described in Hooks section
+
+				folds = {
+					fold_closed = '',
+					fold_open = '',
+					folded = true, -- Automatically fold list on startup
+				},
+
+				indent_lines = {
+					enable = true, -- Show indent guidelines
+					icon = '│',
+				},
+
+				winbar = {
+					enable = true, -- Enable winbar for the preview (requires neovim-0.8+)
+				},
+
+				use_trouble_qf = false -- Quickfix action will open trouble.nvim instead of built-in quickfix list
+			})
+		end
 	}
 }
