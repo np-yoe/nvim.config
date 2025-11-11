@@ -1,225 +1,207 @@
 return {
 	{
+		-- Completion
+		'hrsh7th/nvim-cmp',
+		dependencies = {
+			'hrsh7th/cmp-nvim-lsp',
+			'hrsh7th/cmp-buffer',
+			'hrsh7th/cmp-path',
+			'hrsh7th/cmp-cmdline',
+			'uga-rosa/cmp-dictionary',
+			'lukas-reineke/cmp-under-comparator',
+			'onsails/lspkind.nvim',
+			'L3MON4D3/LuaSnip',
+			'saadparwaiz1/cmp_luasnip',
+			'Saecki/crates.nvim'
+		},
+		config = function()
+			local cmp = require("cmp")
+			local types = require("cmp.types")
+			local comparator = require("cmp-under-comparator")
+
+			-- for rust crate
+			require("crates").setup({
+				lsp = {
+					enabled = true,
+					on_attach = function(client, bufnr)
+						-- the same on_attach function as for your other lsp's
+					end,
+					actions = true,
+					completion = true,
+					hover = true,
+				},
+			})
+
+			-- Global setup
+			cmp.setup({
+				completion = {
+					autocomplete = {
+						cmp.TriggerEvent.InsertEnter,
+						cmp.TriggerEvent.TextChanged
+					}
+				},
+				preselect = cmp.PreselectMode.None,
+				formatting = {
+					-- fields = {'abbr', 'kind', 'menu'},
+					format = require("lspkind").cmp_format({
+						mode = "symbol_text",
+						menu = {
+							buffer = "[Buffer]",
+							nvim_lsp = "[LSP]",
+							copilot = "[Copilot]",
+							luasnip = "[LuaSnip]",
+							nvim_lua = "[NeovimLua]",
+							path = "[Path]",
+							omni = "[Omni]",
+							spell = "[Spell]",
+							emoji = "[Emoji]",
+							calc = "[Calc]",
+							rg = "[Rg]",
+							treesitter = "[TS]",
+							mocword = "[mocword]",
+							cmdline_history = "[History]",
+						},
+					}),
+				},
+				snippet = {
+					-- REQUIRED - you must specify a snippet engine
+					expand = function(args)
+						-- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+						require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+						-- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+						-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+					end,
+				},
+				window = {
+					-- completion = cmp.config.window.bordered(),
+					-- documentation = cmp.config.window.bordered(),
+				},
+				sorting = {
+					comparators = {
+						cmp.config.compare.offset,
+						cmp.config.compare.exact,
+						cmp.config.compare.score,
+						comparator.under,
+						function(entry1, entry2)
+							local kind1 = entry1:get_kind()
+							kind1 = kind1 == types.lsp.CompletionItemKind.Text and 100 or kind1
+							local kind2 = entry2:get_kind()
+							kind2 = kind2 == types.lsp.CompletionItemKind.Text and 100 or kind2
+							if kind1 ~= kind2 then
+								if kind1 == types.lsp.CompletionItemKind.Snippet then
+									return false
+								end
+								if kind2 == types.lsp.CompletionItemKind.Snippet then
+									return true
+								end
+								local diff = kind1 - kind2
+								if diff < 0 then
+									return true
+								elseif diff > 0 then
+									return false
+								end
+							end
+						end,
+						cmp.config.compare.sort_text,
+						cmp.config.compare.length,
+						cmp.config.compare.order,
+					},
+				},
+				sources = cmp.config.sources({
+					{ name = 'luasnip',  max_item_count = 10, priority = 100 },
+					{ name = 'nvim_lsp', max_item_count = 20, priority = 90 },
+				}, {
+					{ name = 'path', max_item_count = 5, priority = 70 },
+				}, {
+					{
+						name = 'buffer',
+						max_item_count = 5,
+						priority = 80,
+						option = {
+							get_bufnrs = function()
+								local bufs = {}
+								for _, win in ipairs(vim.api.nvim_list_wins()) do
+									bufs[vim.api.nvim_win_get_buf(win)] = true
+								end
+								return vim.tbl_keys(bufs)
+							end
+						}
+					},
+					{ name = 'dictionary', priority = 10, keyword_length = 3 },
+					{ name = 'crates',     priority = 10 }, -- for rust crate
+				}),
+				mapping = cmp.mapping.preset.insert({
+					['<C-d>'] = cmp.mapping.scroll_docs(-4),
+					['<C-f>'] = cmp.mapping.scroll_docs(4),
+					['<C-p>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+					['<C-n>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+					['<C-y>'] = cmp.mapping.confirm({ select = true }),
+					['<C-k>'] = cmp.mapping.confirm({ select = true }),
+				}),
+			})
+			require("cmp_dictionary").setup({
+				paths = { vim.fn.stdpath("config") .. "/words" },
+				exact_length = 3,
+			})
+
+			-- Set configuration for specific filetype.
+			cmp.setup.filetype('gitcommit', {
+				sources = cmp.config.sources({
+					{ name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
+				}, {
+					{ name = 'buffer' },
+				})
+			})
+
+			-- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
+			cmp.setup.cmdline('/', {
+				mapping = cmp.mapping.preset.cmdline(),
+				sources = {
+					{ name = 'buffer', max_item_count = 10 }
+				}
+			})
+
+			-- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+			cmp.setup.cmdline(':', {
+				mapping = cmp.mapping.preset.cmdline(),
+				sources = cmp.config.sources({
+					{ name = 'path', max_item_count = 10 }
+				}, {
+					{ name = 'cmdline', max_item_count = 10 }
+				})
+			})
+		end
+	},
+	{
 		'neovim/nvim-lspconfig',
 		dependencies = {
-			-- LSP Support
+			-- LSP manage
 			{
-				-- Optional
 				'williamboman/mason.nvim',
 				build = function()
 					pcall(vim.cmd, 'MasonUpdate')
 				end,
-			},
-			{ 'williamboman/mason-lspconfig.nvim' }, -- Optional
-
-			-- Autocompletion
-			{ 'hrsh7th/cmp-nvim-lsp' }, -- Required
-			{ 'L3MON4D3/LuaSnip' },  -- Required
-			{
-				'hrsh7th/nvim-cmp',
-				dependencies = {
-					'hrsh7th/cmp-nvim-lsp',
-					'hrsh7th/cmp-buffer',
-					'hrsh7th/cmp-path',
-					'hrsh7th/cmp-cmdline',
-					'uga-rosa/cmp-dictionary',
-					'lukas-reineke/cmp-under-comparator',
-					'onsails/lspkind.nvim',
-					'L3MON4D3/LuaSnip',
-					'saadparwaiz1/cmp_luasnip',
-					{
-						'Saecki/crates.nvim',
-						dependencies = { 'nvim-lua/plenary.nvim' },
-						event = { "BufRead Cargo.toml" },
-						config = function()
-							local crates = require("crates")
-							local opts = { silent = true }
-
-							vim.keymap.set("n", "<Space>ct", crates.toggle, opts)
-							vim.keymap.set("n", "<Space>cr", crates.reload, opts)
-
-							vim.keymap.set("n", "<Space>cv", crates.show_versions_popup, opts)
-							vim.keymap.set("n", "<Space>cf", crates.show_features_popup, opts)
-							vim.keymap.set("n", "<Space>cd", crates.show_dependencies_popup, opts)
-
-							vim.keymap.set("n", "<Space>cu", crates.update_crate, opts)
-							vim.keymap.set("v", "<Space>cu", crates.update_crates, opts)
-							vim.keymap.set("n", "<Space>cU", crates.upgrade_crate, opts)
-							vim.keymap.set("v", "<Space>cU", crates.upgrade_crates, opts)
-							-- vim.keymap.set("n", "<Space>ca", crates.update_all_crates, opts)
-							vim.keymap.set("n", "<Space>cA", crates.upgrade_all_crates, opts)
-
-							vim.keymap.set("n", "<Space>cx", crates.expand_plain_crate_to_inline_table, opts)
-							vim.keymap.set("n", "<Space>cX", crates.extract_crate_into_table, opts)
-
-							vim.keymap.set("n", "<Space>cH", crates.open_homepage, opts)
-							vim.keymap.set("n", "<Space>cR", crates.open_repository, opts)
-							vim.keymap.set("n", "<Space>cD", crates.open_documentation, opts)
-							vim.keymap.set("n", "<Space>cC", crates.open_crates_io, opts)
-						end
-					}
-				},
 				config = function()
-					local cmp = require("cmp")
-					local types = require("cmp.types")
-					local comparator = require("cmp-under-comparator")
-
-					-- for rust crate
-					require("crates").setup({
-						lsp = {
-							enabled = true,
-							on_attach = function(client, bufnr)
-								-- the same on_attach function as for your other lsp's
-							end,
-							actions = true,
-							completion = true,
-							hover = true,
-						},
-					})
-
-					-- Global setup
-					cmp.setup({
-						completion = {
-							autocomplete = {
-								cmp.TriggerEvent.InsertEnter,
-								cmp.TriggerEvent.TextChanged
-							}
-						},
-						preselect = cmp.PreselectMode.None,
-						formatting = {
-							-- fields = {'abbr', 'kind', 'menu'},
-							format = require("lspkind").cmp_format({
-								mode = "symbol_text",
-								menu = {
-									buffer = "[Buffer]",
-									nvim_lsp = "[LSP]",
-									copilot = "[Copilot]",
-									luasnip = "[LuaSnip]",
-									nvim_lua = "[NeovimLua]",
-									path = "[Path]",
-									omni = "[Omni]",
-									spell = "[Spell]",
-									emoji = "[Emoji]",
-									calc = "[Calc]",
-									rg = "[Rg]",
-									treesitter = "[TS]",
-									mocword = "[mocword]",
-									cmdline_history = "[History]",
-								},
-							}),
-						},
-						snippet = {
-							-- REQUIRED - you must specify a snippet engine
-							expand = function(args)
-								-- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-								require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-								-- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-								-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
-							end,
-						},
-						window = {
-							-- completion = cmp.config.window.bordered(),
-							-- documentation = cmp.config.window.bordered(),
-						},
-						sorting = {
-							comparators = {
-								cmp.config.compare.offset,
-								cmp.config.compare.exact,
-								cmp.config.compare.score,
-								comparator.under,
-								function(entry1, entry2)
-									local kind1 = entry1:get_kind()
-									kind1 = kind1 == types.lsp.CompletionItemKind.Text and 100 or kind1
-									local kind2 = entry2:get_kind()
-									kind2 = kind2 == types.lsp.CompletionItemKind.Text and 100 or kind2
-									if kind1 ~= kind2 then
-										if kind1 == types.lsp.CompletionItemKind.Snippet then
-											return false
-										end
-										if kind2 == types.lsp.CompletionItemKind.Snippet then
-											return true
-										end
-										local diff = kind1 - kind2
-										if diff < 0 then
-											return true
-										elseif diff > 0 then
-											return false
-										end
-									end
-								end,
-								cmp.config.compare.sort_text,
-								cmp.config.compare.length,
-								cmp.config.compare.order,
-							},
-						},
-						sources = cmp.config.sources({
-							{ name = 'luasnip',  max_item_count = 10, priority = 100 },
-							{ name = 'nvim_lsp', max_item_count = 20, priority = 90 },
-						}, {
-							{ name = 'path', max_item_count = 5, priority = 70 },
-						}, {
-							{
-								name = 'buffer',
-								max_item_count = 5,
-								priority = 80,
-								option = {
-									get_bufnrs = function()
-										local bufs = {}
-										for _, win in ipairs(vim.api.nvim_list_wins()) do
-											bufs[vim.api.nvim_win_get_buf(win)] = true
-										end
-										return vim.tbl_keys(bufs)
-									end
-								}
-							},
-							{ name = 'dictionary', priority = 10, keyword_length = 3 },
-							{ name = 'crates',     priority = 10 }, -- for rust crate
-						}),
-						mapping = cmp.mapping.preset.insert({
-							['<C-d>'] = cmp.mapping.scroll_docs(-4),
-							['<C-f>'] = cmp.mapping.scroll_docs(4),
-							['<C-p>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-							['<C-n>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-							['<C-y>'] = cmp.mapping.confirm({ select = true }),
-							['<C-k>'] = cmp.mapping.confirm({ select = true }),
-						}),
-					})
-					require("cmp_dictionary").setup({
-						paths = { vim.fn.stdpath("config") .. "/words" },
-						exact_length = 3,
-					})
-
-					-- Set configuration for specific filetype.
-					cmp.setup.filetype('gitcommit', {
-						sources = cmp.config.sources({
-							{ name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
-						}, {
-							{ name = 'buffer' },
-						})
-					})
-
-					-- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
-					cmp.setup.cmdline('/', {
-						mapping = cmp.mapping.preset.cmdline(),
-						sources = {
-							{ name = 'buffer', max_item_count = 10 }
-						}
-					})
-
-					-- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-					cmp.setup.cmdline(':', {
-						mapping = cmp.mapping.preset.cmdline(),
-						sources = cmp.config.sources({
-							{ name = 'path', max_item_count = 10 }
-						}, {
-							{ name = 'cmdline', max_item_count = 10 }
-						})
+					require("mason").setup()
+				end
+			},
+			{
+				'williamboman/mason-lspconfig.nvim',
+				after = 'mason.nvim',
+				config = function()
+					require("mason-lspconfig").setup({
+						automatic_enable = true,
+						ensure_installed = { "lua_ls", "rust_analyzer", "gopls", "pyright" }
 					})
 				end
-			}, -- Required
-		}, -- dependencies section ends
+			},
+			-- Completion
+			{ 'hrsh7th/cmp-nvim-lsp' },
+			{ 'hrsh7th/nvim-cmp' },
+			-- Snippets
+			{ 'L3MON4D3/LuaSnip' },
+		},
 		config = function()
-			require("mason").setup()
 			local capabilities = require('cmp_nvim_lsp').default_capabilities()
 			local on_attach = function(client, bufnr)
 				local opts = { buffer = bufnr, remap = false }
@@ -243,9 +225,8 @@ return {
 
 			vim.lsp.config('*', { on_attach = on_attach, capabilities = capabilities })
 
+			-- server settings
 			vim.lsp.config('lua_ls', {
-				on_attach = on_attach,
-				capabilities = capabilities,
 				settings = {
 					Lua = {
 						diagnostics = { globals = { 'vim' } },
@@ -253,12 +234,17 @@ return {
 					},
 				},
 			})
-			vim.lsp.enable('lua_ls')
-
-			-- server settings
+			vim.lsp.config("gopls", {
+				settings = {
+					["gopls"] = {
+						usePlaceholders = true,
+						analyses = {
+							usedparams = true
+						}
+					},
+				},
+			})
 			vim.lsp.config("rust_analyzer", {
-				on_attach = on_attach,
-				capabilities = capabilities,
 				settings = {
 					["rust-analyzer"] = {
 						imports = {
@@ -278,20 +264,6 @@ return {
 					},
 				},
 			})
-			vim.lsp.enable('rust_analyzer')
-			vim.lsp.config("gopls", {
-				on_attach = on_attach,
-				capabilities = capabilities,
-				settings = {
-					["gopls"] = {
-						usePlaceholders = true,
-						analyses = {
-							usedparams = true
-						}
-					},
-				},
-			})
-			vim.lsp.enable('gopls')
 		end
 	},
 	{
