@@ -173,12 +173,12 @@ return {
 		end
 	},
 	-- MISC
-	'markonm/traces.vim',        -- live preview of replaces
-	'nvim-lua/plenary.nvim',     -- dependency for many plugins
-	'tpope/vim-repeat',          -- enhance . repeat
-	"terryma/vim-expand-region", -- expand visual selection with +/_
+	'markonm/traces.vim',         -- live preview of replaces
+	'nvim-lua/plenary.nvim',      -- dependency for many plugins
+	'tpope/vim-repeat',           -- enhance . repeat
+	"terryma/vim-expand-region",  -- expand visual selection with +/_
 	'dhruvasagar/vim-table-mode', -- markdown table mode
-	'djoshea/vim-autoread',
+	'djoshea/vim-autoread',       -- auto reload edited file
 	{
 		-- Preview markdown on browser
 		"iamcco/markdown-preview.nvim",
@@ -197,6 +197,7 @@ return {
 		end,
 	},
 	{
+		-- Enpower csv view
 		"hat0uma/csvview.nvim",
 		opts = {
 			parser = { comments = { "#", "//" } },
@@ -209,6 +210,7 @@ return {
 
 	},
 	{
+		-- D2 renderer
 		"terrastruct/d2-vim",
 		ft = { "d2" },
 	}
